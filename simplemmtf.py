@@ -273,7 +273,7 @@ class IntegerChars:
 
     @staticmethod
     def decode(in_ints):
-        return [(chr(x) if x else u'') for x in api.simpleiter(in_ints)]
+        return [(chr(x) if x else '') for x in api.simpleiter(in_ints)]
 
 
 ######## BUFFERS ################################################
@@ -497,74 +497,74 @@ def _get_array_length(value):
 MMTF_SPEC_VERSION = (1, 0)
 
 encodingrules = {
-    u"altLocList": (6, 0),
-    u"atomIdList": (8, 0),
-    u"bFactorList": (10, 100),
-    u"bondAtomList": (4, 0),
-    u"bondOrderList": (2, 0),
-    u"chainIdList": (5, 4),
-    u"chainNameList": (5, 4),
-    u"groupIdList": (8, 0),
-    u"groupTypeList": (4, 0),
-    u"insCodeList": (6, 0),
-    u"occupancyList": (9, 100),
-    u"secStructList": (2, 0),
-    u"sequenceIndexList": (8, 0),
-    u"xCoordList": (10, 1000),
-    u"yCoordList": (10, 1000),
-    u"zCoordList": (10, 1000),
+    "altLocList": (6, 0),
+    "atomIdList": (8, 0),
+    "bFactorList": (10, 100),
+    "bondAtomList": (4, 0),
+    "bondOrderList": (2, 0),
+    "chainIdList": (5, 4),
+    "chainNameList": (5, 4),
+    "groupIdList": (8, 0),
+    "groupTypeList": (4, 0),
+    "insCodeList": (6, 0),
+    "occupancyList": (9, 100),
+    "secStructList": (2, 0),
+    "sequenceIndexList": (8, 0),
+    "xCoordList": (10, 1000),
+    "yCoordList": (10, 1000),
+    "zCoordList": (10, 1000),
 }
 
 requiredfields = [
-    u"mmtfVersion",
-    u"mmtfProducer",
-    u"numBonds",
-    u"numAtoms",
-    u"numGroups",
-    u"numChains",
-    u"numModels",
-    u"groupList",
-    u"xCoordList",
-    u"yCoordList",
-    u"zCoordList",
-    u"groupIdList",
-    u"groupTypeList",
-    u"chainIdList",
-    u"groupsPerChain",
-    u"chainsPerModel",
+    "mmtfVersion",
+    "mmtfProducer",
+    "numBonds",
+    "numAtoms",
+    "numGroups",
+    "numChains",
+    "numModels",
+    "groupList",
+    "xCoordList",
+    "yCoordList",
+    "zCoordList",
+    "groupIdList",
+    "groupTypeList",
+    "chainIdList",
+    "groupsPerChain",
+    "chainsPerModel",
 ]
 
 levels = {
     # top-level {key}List len=numChains
-    u'chain': {
-        u'chainName': u'',
-        u'chainId': u'',
+    'chain': {
+        'chainName': '',
+        'chainId': '',
     },
     # top-level {key}List len=numGroups
-    u'group': {
-        u'sequenceIndex': -1,
-        u'groupId': -1,
-        u'insCode': u'',
-        u'secStruct': -1,
+    'group': {
+        'sequenceIndex': -1,
+        'groupId': -1,
+        'insCode': '',
+        'secStruct': -1,
     },
     # groupType-level {key}
-    u'grouptype': {
-        u'groupName': u'',
-        u'singleLetterCode': u'?',
-        u'chemCompType': u'',
+    'grouptype': {
+        'groupName': '',
+        'singleLetterCode': '?',
+        'chemCompType': '',
     },
     # groupType-level {key}List
-    u'grouptypeatom': {
-        u'formalCharge': 0,
-        u'atomName': u'',
-        u'element': u'',
+    'grouptypeatom': {
+        'formalCharge': 0,
+        'atomName': '',
+        'element': '',
     },
     # top-level {key}List len=numAtoms
-    u'atom': {
-        u'bFactor': 0.0,
-        u'occupancy': 1.0,
-        u'altLoc': u'',
-        u'atomId': -1,
+    'atom': {
+        'bFactor': 0.0,
+        'occupancy': 1.0,
+        'altLoc': '',
+        'atomId': -1,
     },
 }
 
@@ -586,7 +586,7 @@ def assert_consistency(mmtfdict, acceptempty=False):
 
     # check for missing fields
     for key in requiredfields:
-        if key in (u'mmtfVersion', u'mmtfProducer'):
+        if key in ('mmtfVersion', 'mmtfProducer'):
             # fields set on `encode()`
             continue
 
@@ -595,28 +595,28 @@ def assert_consistency(mmtfdict, acceptempty=False):
 
     # check for correct list lengths
     for numkey, keys in [
-        (u'numAtoms', [
-            u'xCoordList',
-            u'yCoordList',
-            u'zCoordList',
-            u'bFactorList',
-            u'occupancyList',
-            u'altLocList',
-            u'atomIdList',
+        ('numAtoms', [
+            'xCoordList',
+            'yCoordList',
+            'zCoordList',
+            'bFactorList',
+            'occupancyList',
+            'altLocList',
+            'atomIdList',
         ]),
-        (u'numGroups', [
-            u'sequenceIndexList',
-            u'groupIdList',
-            u'insCodeList',
-            u'secStructList',
-            u'groupTypeList',
+        ('numGroups', [
+            'sequenceIndexList',
+            'groupIdList',
+            'insCodeList',
+            'secStructList',
+            'groupTypeList',
         ]),
-        (u'numChains', [
-            u'chainIdList',
-            u'chainNameList',
-            u'groupsPerChain',
+        ('numChains', [
+            'chainIdList',
+            'chainNameList',
+            'groupsPerChain',
         ]),
-        (u'numModels', [u'chainsPerModel']),
+        ('numModels', ['chainsPerModel']),
     ]:
         num = mmtfdict.get(numkey)
         for key in keys:
@@ -630,20 +630,20 @@ def assert_consistency(mmtfdict, acceptempty=False):
                                  (numkey, num, key, length))
 
     # check pointers in groupTypeList
-    numgrouptypes = _get_array_length(d_data[u'groupList'])
-    maxgrouptype = max(mmtfdict.get(u'groupTypeList'))
+    numgrouptypes = _get_array_length(d_data['groupList'])
+    maxgrouptype = max(mmtfdict.get('groupTypeList'))
     if maxgrouptype >= numgrouptypes:
         raise IndexError('max(groupTypeList)=%d len(groupList)=%d' %
                          (maxgrouptype, numgrouptypes))
 
     # check toplevel bonds
-    bondAtomList = noiter(mmtfdict.get(u'bondAtomList', ()))
+    bondAtomList = noiter(mmtfdict.get('bondAtomList', ()))
     numatomindices = len(bondAtomList)
     if numatomindices:
-        if max(bondAtomList) >= mmtfdict.get(u'numAtoms'):
+        if max(bondAtomList) >= mmtfdict.get('numAtoms'):
             raise IndexError('max(bondAtomList) >= numAtoms')
-        if u'bondOrderList' in d_data:
-            numbondorders = _get_array_length(d_data[u'bondOrderList'])
+        if 'bondOrderList' in d_data:
+            numbondorders = _get_array_length(d_data['bondOrderList'])
             if numatomindices != numbondorders * 2 and not (
                     acceptempty and numbondorders == 0):
                 raise IndexError('len(bondAtomList)=%d len(bondOrderList)=%d' %
@@ -693,8 +693,8 @@ class MmtfDict:
         self._set_data(msgpack.unpack(data, **_KWARGS_UNPACK))
 
     def _set_data(self, data):
-        v = mmtfstr(data.get(u'mmtfVersion', ''))
-        v_major = int(v.split(u'.')[0] or 0)
+        v = mmtfstr(data.get('mmtfVersion', ''))
+        v_major = int(v.split('.')[0] or 0)
 
         if v_major > MMTF_SPEC_VERSION[0]:
             raise NotImplementedError('Unsupported version: ' + v)
@@ -741,7 +741,7 @@ class MmtfDict:
         except KeyError:
             return default
 
-        if not (key.endswith(u'List') and isinstance(value, bytes)):
+        if not (key.endswith('List') and isinstance(value, bytes)):
             return value
 
         return decode_array(value)
@@ -787,10 +787,10 @@ class MmtfDict:
 
     def encode(self):
         '''@rtype: bytes'''
-        self.set(u'mmtfVersion', u'%d.%d' % MMTF_SPEC_VERSION)
+        self.set('mmtfVersion', '%d.%d' % MMTF_SPEC_VERSION)
 
-        if not self.get(u'mmtfProducer'):
-            self.set(u'mmtfProducer', u'simplemmtf')
+        if not self.get('mmtfProducer'):
+            self.set('mmtfProducer', 'simplemmtf')
 
         return msgpack.packb(self._data, **_KWARGS_PACK)
 
@@ -844,39 +844,39 @@ def _atoms_iter(data, bonds=None, _just_groups=False):
         bonds.append((i1 + offset, i2 + offset, order))
 
     if bonds is not None:
-        bondAtomList_iter = data.get_iter(u'bondAtomList')
+        bondAtomList_iter = data.get_iter('bondAtomList')
 
-        for order in data.get_iter(u'bondOrderList'):
+        for order in data.get_iter('bondOrderList'):
             i1 = next(bondAtomList_iter)
             i2 = next(bondAtomList_iter)
             add_bond(i1, i2, order)
 
     coord_iter = data.get_table_iter([
-        u'xCoordList',
-        u'yCoordList',
-        u'zCoordList',
+        'xCoordList',
+        'yCoordList',
+        'zCoordList',
     ])
 
     leveliters = lambda level: [
-        (key, data.get_iter(key + u'List'))
+        (key, data.get_iter(key + 'List'))
         for (key, default) in levels[level].items()
-        if key + u'List' in data
+        if key + 'List' in data
     ]
 
-    chain_list_iters = leveliters(u'chain')
-    group_iters = leveliters(u'group')
-    atom_iters = leveliters(u'atom')
+    chain_list_iters = leveliters('chain')
+    group_iters = leveliters('group')
+    atom_iters = leveliters('atom')
 
-    n_groups_iter = data.get_iter(u'groupsPerChain')
-    groupType_iter = data.get_iter(u'groupTypeList')
+    n_groups_iter = data.get_iter('groupsPerChain')
+    groupType_iter = data.get_iter('groupTypeList')
 
-    groupList = data.get(u'groupList')
+    groupList = data.get('groupList')
 
-    atom = {u'modelIndex': -1}
+    atom = {'modelIndex': -1}
     offset = 0
 
-    for n_chains in data.get_iter(u'chainsPerModel'):
-        atom[u'modelIndex'] += 1
+    for n_chains in data.get_iter('chainsPerModel'):
+        atom['modelIndex'] += 1
 
         for n_groups in islice(n_groups_iter, n_chains):
 
@@ -890,7 +890,7 @@ def _atoms_iter(data, bonds=None, _just_groups=False):
 
                 group = groupList[groupType]
 
-                for (key, default) in levels[u'grouptype'].items():
+                for (key, default) in levels['grouptype'].items():
                     atom[key] = group.get(key, default)
 
                 if _just_groups:
@@ -899,19 +899,19 @@ def _atoms_iter(data, bonds=None, _just_groups=False):
 
                 if bonds is not None:
                     group_bond_iter = zip(
-                        group[u'bondAtomList'][0::2],
-                        group[u'bondAtomList'][1::2],
-                        group[u'bondOrderList'], )
+                        group['bondAtomList'][0::2],
+                        group['bondAtomList'][1::2],
+                        group['bondOrderList'], )
 
                     for (i1, i2, order) in group_bond_iter:
                         add_bond(i1, i2, order, offset)
 
                 group_atom_iters = [
-                    (key, iter(group[key + u'List']))
-                    for (key, default) in levels[u'grouptypeatom'].items()
+                    (key, iter(group[key + 'List']))
+                    for (key, default) in levels['grouptypeatom'].items()
                 ]
 
-                for _ in group[u'atomNameList']:
+                for _ in group['atomNameList']:
                     offset += 1
 
                     for key, it in group_atom_iters:
@@ -921,7 +921,7 @@ def _atoms_iter(data, bonds=None, _just_groups=False):
                         atom[key] = next(it)
 
                     # use "coords" instead of xCoord, yCoord, zCoord
-                    atom[u'coords'] = next(coord_iter)
+                    atom['coords'] = next(coord_iter)
 
                     yield atom.copy()
 
@@ -996,33 +996,33 @@ def _from_atoms(atom_iter, bond_iter=None):
 
     raw = {
         # numAtoms
-        u'xCoordList': [],
-        u'yCoordList': [],
-        u'zCoordList': [],
+        'xCoordList': [],
+        'yCoordList': [],
+        'zCoordList': [],
 
         # numGroups
-        u'groupIdList': [],  # auth_seq_id
-        u'groupTypeList': [],  # groupList indices
+        'groupIdList': [],  # auth_seq_id
+        'groupTypeList': [],  # groupList indices
 
         # numChains
-        u'chainIdList': [],
-        u'groupsPerChain': [],
+        'chainIdList': [],
+        'groupsPerChain': [],
 
         # numModels
-        u'chainsPerModel': [],
+        'chainsPerModel': [],
 
         # num group types
-        u'groupList': [],
+        'groupList': [],
 
         # bonds
-        u'numBonds': numBonds,
-        u'bondAtomList': [],
-        u'bondOrderList': optionallist(1),
+        'numBonds': numBonds,
+        'bondAtomList': [],
+        'bondOrderList': optionallist(1),
     }
 
-    for level in (u'chain', u'group', u'atom'):
+    for level in ('chain', 'group', 'atom'):
         for key, default in levels[level].items():
-            key += u'List'
+            key += 'List'
             if key in raw:
                 continue
             raw[key] = optionallist(default)
@@ -1030,7 +1030,7 @@ def _from_atoms(atom_iter, bond_iter=None):
     groupHash = {}
     residue = {}
     residue_first_atom = 0
-    prev_atom = {u'modelIndex': object()}  # unique value
+    prev_atom = {'modelIndex': object()}  # unique value
 
     def handleGroupType(group):
         if not group:
@@ -1041,90 +1041,90 @@ def _from_atoms(atom_iter, bond_iter=None):
         try:
             groupType = groupHash[hashed]
         except KeyError:
-            groupType = len(raw[u'groupList'])
+            groupType = len(raw['groupList'])
             groupHash[hashed] = groupType
-            raw[u'groupList'].append(group)
+            raw['groupList'].append(group)
 
-        raw[u'groupTypeList'].append(groupType)
+        raw['groupTypeList'].append(groupType)
 
     for atomIndex, atom in enumerate(atom_iter):
         try:
-            x, y, z = atom[u'coords']
+            x, y, z = atom['coords']
         except KeyError:
-            x = atom[u'xCoord']
-            y = atom[u'yCoord']
-            z = atom[u'zCoord']
+            x = atom['xCoord']
+            y = atom['yCoord']
+            z = atom['zCoord']
 
         # numAtoms required
-        raw[u'xCoordList'].append(x)
-        raw[u'yCoordList'].append(y)
-        raw[u'zCoordList'].append(z)
+        raw['xCoordList'].append(x)
+        raw['yCoordList'].append(y)
+        raw['zCoordList'].append(z)
 
         # numAtoms optional
-        for key, default in levels[u'atom'].items():
-            raw[key + u'List'].append(atom.get(key, default))
+        for key, default in levels['atom'].items():
+            raw[key + 'List'].append(atom.get(key, default))
 
-        is_same_model = dict_subset_equal(prev_atom, atom, [u'modelIndex'])
+        is_same_model = dict_subset_equal(prev_atom, atom, ['modelIndex'])
 
         if not is_same_model:
-            raw[u'chainsPerModel'].append(0)
+            raw['chainsPerModel'].append(0)
             is_same_chain = False
         else:
             is_same_chain = dict_subset_equal(prev_atom, atom,
-                                              levels[u'chain'])
+                                              levels['chain'])
 
         if not is_same_chain:
-            raw[u'chainsPerModel'][-1] += 1
-            raw[u'groupsPerChain'].append(0)  # increment with every group
-            for key, default in levels[u'chain'].items():
-                raw[key + u'List'].append(atom.get(key, default))
+            raw['chainsPerModel'][-1] += 1
+            raw['groupsPerChain'].append(0)  # increment with every group
+            for key, default in levels['chain'].items():
+                raw[key + 'List'].append(atom.get(key, default))
             is_same_residue = False
         else:
             is_same_residue = dict_subset_equal(prev_atom, atom,
-                                                levels[u'group'])
+                                                levels['group'])
 
         if not is_same_residue:
-            raw[u'groupsPerChain'][-1] += 1
+            raw['groupsPerChain'][-1] += 1
 
             handleGroupType(residue)
 
-            for key, default in levels[u'group'].items():
-                raw[key + u'List'].append(atom.get(key, default))
+            for key, default in levels['group'].items():
+                raw[key + 'List'].append(atom.get(key, default))
 
             residue = {
-                u'bondAtomList': [],
-                u'bondOrderList': [],
+                'bondAtomList': [],
+                'bondOrderList': [],
             }
 
-            residue.update((key + u'List', [])
+            residue.update((key + 'List', [])
                            for key in levels['grouptypeatom'])
 
-            for key, default in levels[u'grouptype'].items():
+            for key, default in levels['grouptype'].items():
                 residue[key] = atom.get(key, default)
 
             residue_first_atom = atomIndex
 
-        for key, default in levels[u'grouptypeatom'].items():
-            residue[key + u'List'].append(atom.get(key, default))
+        for key, default in levels['grouptypeatom'].items():
+            residue[key + 'List'].append(atom.get(key, default))
 
         for bond in bonds.get(atomIndex, ()):
             if bond[0] < residue_first_atom:
-                raw[u'bondAtomList'].append(atomIndex)
-                raw[u'bondAtomList'].append(bond[0])
-                raw[u'bondOrderList'].append(bond[1])
+                raw['bondAtomList'].append(atomIndex)
+                raw['bondAtomList'].append(bond[0])
+                raw['bondOrderList'].append(bond[1])
             else:
-                residue[u'bondAtomList'].append(atomIndex - residue_first_atom)
-                residue[u'bondAtomList'].append(bond[0] - residue_first_atom)
-                residue[u'bondOrderList'].append(bond[1])
+                residue['bondAtomList'].append(atomIndex - residue_first_atom)
+                residue['bondAtomList'].append(bond[0] - residue_first_atom)
+                residue['bondOrderList'].append(bond[1])
 
         prev_atom = atom
 
     handleGroupType(residue)
 
-    raw[u'numAtoms'] = len(raw[u'xCoordList'])
-    raw[u'numGroups'] = len(raw[u'groupIdList'])
-    raw[u'numChains'] = len(raw[u'chainIdList'])
-    raw[u'numModels'] = len(raw[u'chainsPerModel'])
+    raw['numAtoms'] = len(raw['xCoordList'])
+    raw['numGroups'] = len(raw['groupIdList'])
+    raw['numChains'] = len(raw['chainIdList'])
+    raw['numModels'] = len(raw['chainsPerModel'])
 
     return raw
 
@@ -1137,13 +1137,13 @@ if __name__ == '__main__':
         d = from_url(fn)
         d.to_dict()
         for a in list(d.atoms())[:3]:
-            print(a[u'groupName'], a[u'groupId'], a[u'atomName'], a[u'coords'])
+            print(a['groupName'], a['groupId'], a['atomName'], a['coords'])
         # re-serialization
         bonds = []
         atoms = list(d.atoms(bonds))
         d_out = from_atoms(atoms, bonds)
         del atoms, bonds
-        assert d.get(u'numAtoms') == d_out.get(u'numAtoms')
-        assert d.get(u'numBonds') == d_out.get(u'numBonds')
-        assert d.get(u'numModels') == d_out.get(u'numModels')
+        assert d.get('numAtoms') == d_out.get('numAtoms')
+        assert d.get('numBonds') == d_out.get('numBonds')
+        assert d.get('numModels') == d_out.get('numModels')
         assert_consistency(d_out)
