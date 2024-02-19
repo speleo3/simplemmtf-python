@@ -77,6 +77,16 @@ import os
 import sys
 import itertools
 import struct
+from typing import Any, Dict, Iterable, Iterator, List, Optional, Sequence, Tuple, Union
+from urllib.request import urlopen
+
+AtomDict = dict
+BondTuple = Tuple[int, int, int]
+BondTupleLike = Union[BondTuple, Tuple[int, int]]
+CodecType = int
+
+CODEC_TYPE_AUTO = -1
+CODEC_TYPE_NONE = 0
 
 try:
     import msgpack
@@ -86,9 +96,6 @@ except ImportError:
     import umsgpack as msgpack
     _KWARGS_UNPACK = {}
     _KWARGS_PACK = {}
-
-from urllib.request import urlopen
-_next_method_name = '__next__'
 
 
 def mmtfstr(s):
@@ -144,7 +151,7 @@ def noiter(iterable):
     '''If `iterable` is an iterator then convert it to a list.
     '''
     if not hasattr(iterable, '__len__') and \
-            hasattr(iterable, _next_method_name):
+            hasattr(iterable, '__next__'):
         return list(iterable)
     return iterable
 
@@ -425,12 +432,12 @@ strategies = {
 }
 
 # optional parameters format (defaults to 'i' -> one int32 argument)
-strategyparamsfmt = {}
+strategyparamsfmt: Dict[CodecType, str] = {}
 
 ########## MEDIUM LEVEL ARRAY ENCODE/DECODE API #################
 
 
-def check_encodable(arr, codec, param=0):
+def check_encodable(arr: Sequence, codec: CodecType, param=0) -> bool:
     '''Check if an array is encodable with the requested strategy.
 
     Example of type 5 "fixed-length string array" with string length 4:
@@ -446,14 +453,11 @@ def check_encodable(arr, codec, param=0):
     return True
 
 
-def encode_array(arr, codec, param=0):
+def encode_array(arr: Sequence, codec: CodecType, param=0) -> bytes:
     '''
     @param arr: array to encode
-    @type arr: sequence
     @param codec: encoding strategy
-    @type codec: int
     @param param: codec-specific parameter data
-    @rtype: bytes
     '''
     strategy = strategies[codec](param)
 
@@ -466,11 +470,9 @@ def encode_array(arr, codec, param=0):
     return buf
 
 
-def decode_array(value):
+def decode_array(value: bytes) -> Iterable:
     '''
     @param value: binary encoded array
-    @type value: bytes
-    @rtype: iterable
     '''
     codec, length = struct.unpack(MMTF_ENDIAN + 'ii', value[:8])
 
@@ -534,7 +536,7 @@ requiredfields = [
     "chainsPerModel",
 ]
 
-levels = {
+levels: Dict[str, Dict[str, Any]] = {
     # top-level {key}List len=numChains
     'chain': {
         'chainName': '',
@@ -569,14 +571,13 @@ levels = {
 }
 
 
-def assert_consistency(mmtfdict, acceptempty=False):
+def assert_consistency(mmtfdict: Union["MmtfDict", dict],
+                       acceptempty: bool = False):
     '''Raise KeyError if any non-optional field is missing.
     Raise IndexError if any array has the wrong length.
 
     @param mmtfdict: container to check
-    @type mmtfdict: MmtfDict or dict
     @param acceptempty: accept length zero for non-required lists
-    @type acceptempty: bool
     '''
 
     if isinstance(mmtfdict, MmtfDict):
@@ -626,8 +627,7 @@ def assert_consistency(mmtfdict, acceptempty=False):
             if acceptempty and length == 0 and key not in requiredfields:
                 continue
             if length != num:
-                raise IndexError('length mismatch %s=%d len(%s)=%d' %
-                                 (numkey, num, key, length))
+                raise IndexError(f'length mismatch {numkey}={num} len({key})={length}')
 
     # check pointers in groupTypeList
     numgrouptypes = _get_array_length(d_data['groupList'])
@@ -687,12 +687,12 @@ class MmtfDict:
                 self._set_data(msgpack.unpackb(data, **_KWARGS_UNPACK))
                 return
 
-            import io, gzip
+            import io, gzip  # noqa: E401
             data = gzip.GzipFile(fileobj=io.BytesIO(data))
 
         self._set_data(msgpack.unpack(data, **_KWARGS_UNPACK))
 
-    def _set_data(self, data):
+    def _set_data(self, data: dict):
         v = mmtfstr(data.get('mmtfVersion', ''))
         v_major = int(v.split('.')[0] or 0)
 
@@ -702,35 +702,36 @@ class MmtfDict:
         self._data = data
 
     @classmethod
-    def from_url(cls, url):
+    def from_url(cls, url: str) -> "MmtfDict":
         '''Load an MMTF file from disk or URL'''
         handle = open(url, 'rb') if os.path.isfile(url) else urlopen(url)
-        return cls(handle.read())
+        with handle:
+            return cls(handle.read())
 
-    def __setitem__(self, key, value):
+    def __setitem__(self, key: str, value):
         '''Set a field, using the default encoding according to the spec'''
         self.set(key, value)
 
-    def __delitem__(self, key):
+    def __delitem__(self, key: str):
         '''Remove a field'''
         try:
             del self._data[key]
         except KeyError:
             del self._data[mmtfstr(key)]
 
-    def __contains__(self, key):
+    def __contains__(self, key: str) -> bool:
         '''True if the field exists in this container'''
         return key in self._data
 
-    def keys(self):
+    def keys(self) -> Iterator[str]:
         '''Iterator over toplevel field names'''
         return iter(self._data)
 
-    def to_dict(self):
+    def to_dict(self) -> dict:
         '''Fully decoded copy of this instance'''
         return dict((k, noiter(self.get(k))) for k in self._data)
 
-    def get(self, key, default=None):
+    def get(self, key: str, default=None):
         '''Look up a toplevel field by name, and decode on the fly.
         The return value of encoded lists is iterable, the exact return
         type is not guaranteed (can be iterator, list, or numpy array).
@@ -746,15 +747,19 @@ class MmtfDict:
 
         return decode_array(value)
 
-    def get_iter(self, key, default=()):
+    def get_iter(self, key: str, default=()) -> Iterator:
         '''Like `get(...)` but always return an iterator'''
         return api.simpleiter(self.get(key, default))
 
-    def get_noiter(self, key, default=()):
+    def get_noiter(self, key: str, default=()) -> Sequence:
         '''Like `get(...)` but never return an iterator'''
         return noiter(self.get(key, default))
 
-    def get_table_iter(self, keys, defaults=None):
+    def get_table_iter(
+        self,
+        keys: Iterable[str],
+        defaults: Optional[Iterable] = None,
+    ) -> Iterator[tuple]:
         '''Treat a set of fields like columns of a table and return an
         iterator over the table rows. A field may be empty or missing,
         in which case the column will be filled with `None` or with the
@@ -771,22 +776,22 @@ class MmtfDict:
             for (k, d) in zip(keys, defaults)
         ])
 
-    def set(self, key, value, codec=-1, param=0):
+    def set(self, key: str, value, codec: CodecType = CODEC_TYPE_AUTO, param=0):
         '''Set a toplevel field and store in decoded form.
         
         If `codec` is 0, then the data is not encoded. If `codec` is -1,
         then look up the default encoding for `key` in the MMTF spec.
         '''
-        if codec == -1:
+        if codec == CODEC_TYPE_AUTO:
             codec, param = encodingrules.get(key, (0, 0))
 
-        if codec != 0 and check_encodable(value, codec, param):
+        if codec != CODEC_TYPE_NONE and check_encodable(value, codec, param):
             value = encode_array(value, codec, param)
 
         self._data[mmtfstr(key)] = value
 
-    def encode(self):
-        '''@rtype: bytes'''
+    def encode(self) -> bytes:
+        '''Serialize to MessagePack'''
         self.set('mmtfVersion', '%d.%d' % MMTF_SPEC_VERSION)
 
         if not self.get('mmtfProducer'):
@@ -795,7 +800,11 @@ class MmtfDict:
         return msgpack.packb(self._data, **_KWARGS_PACK)
 
     @classmethod
-    def from_atoms(cls, atom_iter, bond_iter=None):
+    def from_atoms(
+        cls,
+        atom_iter: Iterable[AtomDict],
+        bond_iter: Optional[Iterable[BondTupleLike]] = None,
+    ) -> "MmtfDict":
         '''
         Serialize atom and bond tables to MMTF format.
 
@@ -803,33 +812,31 @@ class MmtfDict:
         items, e.g. {u'chainName': u'A', u'groupId': 1, ...}
 
         @param bond_iter: optional iterator over (index1, index2, order) tuples
-
-        @rtype: MmtfDict
         '''
         raw = _from_atoms(atom_iter, bond_iter)
         return cls(raw)
 
-    def atoms(self, bonds=None):
+    def atoms(self, bonds: Optional[List[BondTuple]] = None):
         '''Iterator over atoms.
 
         @param bonds: Optional output variable for bonds as (index1, index2, order)
-        @type bonds: list
-
-        @rtype: generator
         '''
         return _atoms_iter(self, bonds)
 
-    def groups(self):
+    def groups(self) -> Iterator[AtomDict]:
         '''Iterator over groups.'''
         return _atoms_iter(self, _just_groups=True)
 
 
 from_atoms = MmtfDict.from_atoms
-decode = lambda data: MmtfDict(data)
 from_url = MmtfDict.from_url
 
 
-def fetch(code):
+def decode(data: bytes) -> MmtfDict:
+    return MmtfDict(data)
+
+
+def fetch(code: str) -> MmtfDict:
     '''Download from RCSB web service'''
     return from_url("http://mmtf.rcsb.org/v1.0/full/" + code + ".mmtf.gz")
 
@@ -837,10 +844,14 @@ def fetch(code):
 ############# TRAVERSAL ######################################
 
 
-def _atoms_iter(data, bonds=None, _just_groups=False):
+def _atoms_iter(
+    data: MmtfDict,
+    bonds: Optional[List[BondTuple]] = None,
+    _just_groups: bool = False,
+) -> Iterator[AtomDict]:
     from itertools import islice
 
-    def add_bond(i1, i2, order, offset=0):
+    def add_bond(i1: int, i2: int, order: int, offset: int = 0):
         bonds.append((i1 + offset, i2 + offset, order))
 
     if bonds is not None:
@@ -857,11 +868,10 @@ def _atoms_iter(data, bonds=None, _just_groups=False):
         'zCoordList',
     ])
 
-    leveliters = lambda level: [
-        (key, data.get_iter(key + 'List'))
-        for (key, default) in levels[level].items()
-        if key + 'List' in data
-    ]
+    def leveliters(level: str):
+        return [(key, data.get_iter(key + 'List'))
+                for (key, default) in levels[level].items()
+                if key + 'List' in data]
 
     chain_list_iters = leveliters('chain')
     group_iters = leveliters('group')
@@ -872,7 +882,7 @@ def _atoms_iter(data, bonds=None, _just_groups=False):
 
     groupList = data.get('groupList')
 
-    atom = {'modelIndex': -1}
+    atom: Dict[str, Any] = {'modelIndex': -1}
     offset = 0
 
     for n_chains in data.get_iter('chainsPerModel'):
@@ -929,7 +939,7 @@ def _atoms_iter(data, bonds=None, _just_groups=False):
 ############### TABLE SERIALIZATION ######################
 
 
-def dict_as_tuple(d):
+def dict_as_tuple(d: dict) -> tuple:
     def gen():
         for (k, v) in sorted(d.items()):
             if isinstance(v, list):
@@ -941,7 +951,7 @@ def dict_as_tuple(d):
     return tuple(gen())
 
 
-def dict_subset_equal(d1, d2, keys):
+def dict_subset_equal(d1: dict, d2: dict, keys: Iterable) -> bool:
     for key in keys:
         if d1.get(key) != d2.get(key):
             return False
@@ -978,9 +988,10 @@ class optionallist(list):
         self._size += 1
 
 
-def _from_atoms(atom_iter, bond_iter=None):
-    '''@rtype: dict
-    '''
+def _from_atoms(
+    atom_iter: Iterable[AtomDict],
+    bond_iter: Optional[Iterable[BondTupleLike]] = None,
+) -> dict:
     import collections
 
     bonds = collections.defaultdict(list)
@@ -1032,7 +1043,7 @@ def _from_atoms(atom_iter, bond_iter=None):
     residue_first_atom = 0
     prev_atom = {'modelIndex': object()}  # unique value
 
-    def handleGroupType(group):
+    def handleGroupType(group: dict):
         if not group:
             return
 
@@ -1139,7 +1150,7 @@ if __name__ == '__main__':
         for a in list(d.atoms())[:3]:
             print(a['groupName'], a['groupId'], a['atomName'], a['coords'])
         # re-serialization
-        bonds = []
+        bonds: List[BondTuple] = []
         atoms = list(d.atoms(bonds))
         d_out = from_atoms(atoms, bonds)
         del atoms, bonds
